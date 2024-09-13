@@ -35,7 +35,7 @@ export const signup = async (req, res, next) => {
         ],
       });
   
-      const signUpResponse = await client.send(signUpCommand);
+      const signUpResponse = await client.send(signUpCommand);  
   
       return res.status(200).json({
         message: 'Sign-up successful! Please check your email for the confirmation code.',
@@ -69,56 +69,53 @@ export const confirmSignup = async (req, res, next) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 };
-export const signin = async(req,res,next)=>{
-    const {email, password} = req.body;
-    // console.log(process.env)
-    const command = new InitiateAuthCommand({
-        AuthFlow: 'USER_PASSWORD_AUTH',
-        ClientId: process.env.COGNITO_CLIENT_ID,
-        AuthParameters: {
-          USERNAME: email,
-          PASSWORD: password,
-        },
-      });
-    try {
-        const response = await client.send(command);
-        console.log(response);
+export const signin = async (req, res, next) => {
+  const { email, password } = req.body;
 
-        // Extract tokens
-        const accessToken = response.AuthenticationResult.AccessToken;
-        const refreshToken = response.AuthenticationResult.RefreshToken;
-        const idToken = response.AuthenticationResult.IdToken;
+  const authCommand = new InitiateAuthCommand({
+    AuthFlow: 'USER_PASSWORD_AUTH',
+    ClientId: process.env.COGNITO_CLIENT_ID,
+    AuthParameters: {
+      USERNAME: email,
+      PASSWORD: password,
+    },
+  });
 
-        const decodedIdToken = jwt.decode(idToken);
+  try {
+    // Step 1: Authenticate user
+    const authResponse = await client.send(authCommand);
 
-        // Generate JWT access token
-        const jwtAccessToken = jwt.sign(
-          { email, sub: accessToken },
-          process.env.JWT_SECRET,
-          { expiresIn: '15m' } // Short-lived access token
-      );
-      return res.status(200).cookie('access_token', jwtAccessToken, {
+    // Step 2: Extract tokens directly from Cognito's response
+    const accessToken = authResponse.AuthenticationResult.AccessToken;
+    const refreshToken = authResponse.AuthenticationResult.RefreshToken;
+    const idToken = authResponse.AuthenticationResult.IdToken;
+
+    // Step 4: Decode ID token to get user info (name, email, etc.)
+    const decodedIdToken = jwt.decode(idToken);
+
+    // Step 5: Set tokens in cookies and return user info
+    return res.status(200)
+      .cookie('access_token', accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Strict',
-        }).cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
-        }).json({
-            message: 'Sign-in successful',
-            accessToken: jwtAccessToken,
-            refreshToken: refreshToken,
-            
-            name: decodedIdToken.name,
-            email: decodedIdToken.email
-            
-        } );
-    } catch (error) {
-        console.error('Authentication failed:', error);
-    }
-}
+      })
+      .cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      })
+      .json({
+        message: 'Sign-in successful',
+        name: decodedIdToken.name,
+        email: decodedIdToken.email,
+      });
 
+  } catch (error) {
+    console.error('Authentication or confirmation failed:', error);
+    return next(errorHandler(401, 'Please verify you email before signin'));
+  }
+};
 
 export const refreshAccessToken = async (req, res, next) => {
     const refreshToken = req.cookies.refresh_token;
@@ -162,13 +159,13 @@ export const refreshAccessToken = async (req, res, next) => {
     
         return res.status(200).json({ message: 'Access token refreshed successfully' });
     } catch (error) {
-        console.error('Token refresh failed:', error);
+      console.error('Token refresh failed:', error);
 
-        // Clear all cookies if refresh token is invalid or error occurs
-        res.clearCookie('access_token');
-        res.clearCookie('refresh_token');
+      // Clear all cookies if refresh token is invalid or error occurs
+      res.clearCookie('access_token');
+      res.clearCookie('refresh_token');
 
-        return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+      return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
     }
 };
 
@@ -193,3 +190,35 @@ export const checkAuthStatus = async (req, res) => {
   }
 };
 
+export const checkUserConfirmationStatus = async (req, res) => {
+  const accessToken = req.cookies.access_token;
+
+  if (!accessToken) {
+    return res.status(401).json({ message: 'No access token found' });
+  }
+
+  try {
+    // Extract the user sub (subject) from the access token
+    const decodedToken = jwt.decode(accessToken);
+    const userSub = decodedToken.sub;
+
+    // Get user details using AdminGetUserCommand
+    const adminGetUserCommand = new AdminGetUserCommand({
+      UserPoolId: process.env.COGNITO_USER_POOL_ID,
+      Username: userSub,
+    });
+    
+    const user = await client.send(adminGetUserCommand);
+    
+    if (user.UserConfirmed) {
+      return res.status(200).json({ message: 'User is confirmed' });
+    } else {
+      return res.status(403).json({ message: 'User is not confirmed' });
+    }
+  } catch (error) {
+    console.error('Error checking user confirmation status:', error);
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    return res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
