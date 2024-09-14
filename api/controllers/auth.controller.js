@@ -109,6 +109,7 @@ export const signin = async (req, res, next) => {
         message: 'Sign-in successful',
         name: decodedIdToken.name,
         email: decodedIdToken.email,
+        userId: decodedIdToken?.username,
       });
 
   } catch (error) {
