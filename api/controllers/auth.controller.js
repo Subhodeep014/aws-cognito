@@ -3,7 +3,7 @@ import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, List
 } from '@aws-sdk/client-cognito-identity-provider';
 import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken'
-const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
+const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGIONN });
 
 
 export const signup = async (req, res, next) => {
