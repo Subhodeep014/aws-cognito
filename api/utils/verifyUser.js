@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { errorHandler } from '../utils/error.js';
 import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
 
-const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
+const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGIONN });
 
 export const verifyUser = async (req, res, next) => {
   const accessToken = req.cookies.access_token;
