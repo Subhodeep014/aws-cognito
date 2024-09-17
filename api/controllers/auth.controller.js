@@ -122,11 +122,24 @@ export const signin = async (req, res, next) => {
         userId: decodedIdToken["cognito:username"],
       });
 
-  } catch (error) {
+  } 
+  catch (error) {
+    // Handle incorrect password case
+    if (error.name === 'NotAuthorizedException') {
+      return next(errorHandler(401, 'Incorrect email or password.'));
+    }
+
+    // Handle user not confirmed error
+    if (error.name === 'UserNotConfirmedException') {
+      return next(errorHandler(401, 'Please verify your email before signing in.'));
+    }
+
+    // Log and handle any other errors
     console.error('Authentication or confirmation failed:', error);
-    return next(errorHandler(401, 'Please verify you email before signin'));
+    return next(errorHandler(500, 'Something went wrong during sign-in.'));
   }
-};
+}
+
 export const resendOTP = async (req, res, next) => {
   const { email } = req.body;
 
