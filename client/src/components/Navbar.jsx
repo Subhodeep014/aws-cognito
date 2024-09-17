@@ -30,7 +30,8 @@ export default function Navbar() {
   const {theme} = useSelector(state => state.theme)
 
   const handleSignout = async () => {
-    };
+    dispatch(signoutSuccess())
+  };
   return (
     <div className="z-20 bg-transparent">
       <header className="sticky top-0 flex h-16 items-center gap-2 md:gap-4 border-b bg-transparent bg-opacity-50 backdrop-blur-md px-4 md:px-6 justify-between" >
@@ -80,9 +81,9 @@ export default function Navbar() {
           ):(
             <>
               <div className="hidden md:flex">
-                <Link to='/sign-in' className='font-semibold whitespace-nowrap'>Sign In</Link>
+                <Link to='/signin' className='font-semibold whitespace-nowrap'>Sign In</Link>
               </div>
-              <Link to='/sign-up'><Button className='rounded-3xl text-[12px] md:text-sm w-16 md:w-28 h-8 md:h-9'>Sign Up</Button></Link>
+              <Link to='/signup'><Button className='rounded-3xl text-[12px] md:text-sm w-16 md:w-28 h-8 md:h-9'>Sign Up</Button></Link>
             </>
  
           )}

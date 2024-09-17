@@ -1,5 +1,5 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ListUsersCommand, AdminGetUserCommand
-    ,ConfirmSignUpCommand
+    ,ConfirmSignUpCommand, ResendConfirmationCodeCommand
 } from '@aws-sdk/client-cognito-identity-provider';
 import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken'
@@ -7,6 +7,7 @@ const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGIO
 
 export const signup = async (req, res, next) => {
     const { email, password, name } = req.body;
+    console.log(email, password, name)
   
     try {
         // Check if the email already exists in the user pool
@@ -117,7 +118,25 @@ export const signin = async (req, res, next) => {
     return next(errorHandler(401, 'Please verify you email before signin'));
   }
 };
+export const resendOTP = async (req, res, next) => {
+  const { email } = req.body;
 
+  try {
+      const resendCommand = new ResendConfirmationCodeCommand({
+          ClientId: process.env.COGNITO_CLIENT_ID,
+          Username: email,
+      });
+
+      await client.send(resendCommand);
+
+      return res.status(200).json({
+          message: 'Confirmation code resent successfully. Please check your email.'
+      });
+  } catch (error) {
+      console.error('Error resending confirmation code:', error);
+      return res.status(400).json({ success: false, message: error.message });
+  }
+};
 export const refreshAccessToken = async (req, res, next) => {
     const refreshToken = req.cookies.refresh_token;
 
