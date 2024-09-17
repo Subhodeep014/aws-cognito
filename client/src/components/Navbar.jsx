@@ -22,8 +22,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { signoutSuccess } from '../../redux/user/userSlice';
 import { toast } from 'react-toastify';
+import { useToast } from '@/hooks/use-toast'
 import { toggleTheme } from '../../redux/theme/themeSlice';
 export default function Navbar() {
+  const {toast} = useToast();
   const navigate = useNavigate()
   const dispatch = useDispatch();
   const {currentUser} = useSelector(state => state.user)
@@ -31,6 +33,25 @@ export default function Navbar() {
 
   const handleSignout = async () => {
     dispatch(signoutSuccess())
+    try {
+      const res = await fetch("/api/user/signout", {
+        method : "GET",
+        headers : {
+          "Content-Type" : "application/json"
+        }
+      })
+
+      const data = await res.json();
+      if(res.ok){
+        toast({
+          title : "Signed out successfully!",
+          duration : 2500,
+          variant : "success"
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
   };
   return (
     <div className="z-20 bg-transparent">
@@ -71,7 +92,7 @@ export default function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="shadcn-sheet-content">
-                <DropdownMenuLabel>{currentUser.fullname}</DropdownMenuLabel>
+                <DropdownMenuLabel>{currentUser.name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem><Link to ='/todo'>Your Todos</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />

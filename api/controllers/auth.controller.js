@@ -81,6 +81,15 @@ export const signin = async (req, res, next) => {
       PASSWORD: password,
     },
   });
+  const listUsersCommand = new ListUsersCommand({
+    UserPoolId: process.env.COGNITO_USER_POOL_ID,
+    Filter: `email = "${email}"`,
+  });
+  const listUsersResponse = await client.send(listUsersCommand);
+
+  if (!listUsersResponse.Users.length > 0) {
+      return next(errorHandler(400, 'Wrong credential or user not exist!  '));
+  }
 
   try {
     // Step 1: Authenticate user
@@ -137,6 +146,13 @@ export const resendOTP = async (req, res, next) => {
       return res.status(400).json({ success: false, message: error.message });
   }
 };
+
+export const signout = async(req, res)=>{
+  res.clearCookie("access_token");
+  res.clearCookie("refresh_token");
+
+  return res.status(200).json({message : "Signed out successfully"});
+}
 export const refreshAccessToken = async (req, res, next) => {
     const refreshToken = req.cookies.refresh_token;
 

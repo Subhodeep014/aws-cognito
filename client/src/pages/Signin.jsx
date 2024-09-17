@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useToast } from '@/hooks/use-toast'
 import { addEmail, deleteEmail } from '../../redux/user/verifySlice';
 import { signInSuccess } from '../../redux/user/userSlice';
-
+import { Loader2 } from "lucide-react"
 export default function Signin() {
     const {email} = useSelector(state=>state.email);
     const[showVerify, setShowVerify] = useState(false)
@@ -19,6 +19,7 @@ export default function Signin() {
         email : "",
         password: ""
     });
+    const [loading, setLoading] = useState(false);
     const {toast} = useToast();
     // const {loading, error: errorMessage} = useSelector(state => state.user)
     
@@ -28,6 +29,7 @@ export default function Signin() {
     }
     const handleSubmit = async(e)=>{
         e.preventDefault();
+        setLoading(true);
         if(!formData.email){
             const showToast = () => {
                 toast({
@@ -38,6 +40,7 @@ export default function Signin() {
                 })
             }
             showToast()
+            setLoading(false);
             return ;
         }
         dispatch(addEmail(formData?.email));
@@ -53,14 +56,18 @@ export default function Signin() {
             if(res.ok){
                 const showToast = () => {
                     toast({
-                      title: "Welcome",
+                      title: `Signin Success!`,
+                      description : `Welcome ${data?.name}!`,
                       variant: "success",
-                      duration : 2500,
+                      duration : 2000,
                     })
                 }
                 showToast();
                 dispatch(signInSuccess(data))
+                dispatch(deleteEmail());
+                navigate("/")
             }else{
+                setLoading(false);
                 const errorMsg = data?.message;
                 setErrorMessage(errorMsg)
                 setShowVerify(true);
@@ -68,7 +75,7 @@ export default function Signin() {
                     toast({
                       title: `${errorMsg}`,
                       variant: "destructive",
-                      duration : 2500,
+                      duration : 2000,
                     })
                 }
                 showToast();
@@ -88,13 +95,14 @@ export default function Signin() {
                             const showToast = () => {
                                 toast({
                                   title: `${data?.message}`,
-                                  duration : 2500,
+                                  duration : 2000,
                                 })
                             }
                             showToast();
                         }  
                         navigate("/verify")                      
                     } catch (error) {
+                        setLoading(false);
                         console.error(error)
                     }
 
@@ -104,6 +112,7 @@ export default function Signin() {
     
             }            
         } catch (error) {
+            setLoading(false)
             setShowVerify(true);
             console.error(error);
         }
@@ -141,8 +150,11 @@ export default function Signin() {
                                 </div>
                                 <Input id="password" ref={passwordRef} onChange ={handleChange} type="password" placeholder='********' required />
                             </div>
-                            <Button type="submit" className="w-full mt-4 mb-2">
-                            Login
+                            <Button type="submit" disabled = {loading} className={`w-full mt-4 mb-2 ${loading? "opacity-40" : ""}`}>
+                                {loading && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                Login
                             </Button>
                             {/* <Button type="button" className="w-full bg-teal-400">
                             Login with Google

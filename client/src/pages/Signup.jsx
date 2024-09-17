@@ -13,10 +13,11 @@ import { Label } from "@/components/ui/label"
 import { Link, useNavigate } from 'react-router-dom'
 import { useToast } from '@/hooks/use-toast'
 import { addEmail, deleteEmail } from '../../redux/user/verifySlice'
+import { useDispatch } from 'react-redux'
 
 export default function Signup() {
     const {toast} = useToast();
-
+    const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     email : "",
     name : "",
@@ -32,15 +33,18 @@ export default function Signup() {
   }
   const handleSubmit = async(e)=>{
     e.preventDefault();
+    setLoading(true);
     if(!formData.email || !formData.name || !formData.password || !formData.email==="" || !formData.name==="" || !formData.password==="" ){
       toast({
         title : "Please fill out all feilds",
         duration : 2500,
         variant : "destructive"
       });
+      setLoading(false);
       return setErrorMessage('Please fill out all feilds');
     }
     try {
+      dispatch(addEmail(formData?.email));
         const res = await fetch('/api/user/signup' , {
             method : "POST",
             headers : {
@@ -65,9 +69,11 @@ export default function Signup() {
             }
             // toast.success('Account created successfully!');
             showToast();
+            setLoading(false);
             navigate("/verify")
         }
         else{
+          setLoading(false)
             const errorMsg = data?.message || 'Something went wrong';
             setErrorMessage(errorMsg);
             const showToast = () => {
@@ -87,6 +93,7 @@ export default function Signup() {
     } catch (error) {
         // toast.error(errorMessage)
         // showToast();
+        setLoading(false)
         setShowVerify(true);
         console.error(error);
     }

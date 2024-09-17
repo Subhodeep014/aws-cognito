@@ -43,7 +43,7 @@ export function Verify() {
             variant: "success",
             duration : 2000
           })  
-          navigate('/');  
+          navigate('/signin');  
         }else{
           toast({
             title: "Invalid Code",

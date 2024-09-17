@@ -31,7 +31,7 @@ export default function Home() {
           </div>
           <div className="">
           <Button className="bg-green-800 dark:bg-green-800 text-white dark:text-white dark:hover:bg-teal-900">
-            <Link to={currentUser ? '/todo' : '/sign-in'}>
+            <Link to={currentUser ? '/todo' : '/signin'}>
                 {currentUser ? 'Get Started' : 'Sign in to get started'}
             </Link>
         </Button>
