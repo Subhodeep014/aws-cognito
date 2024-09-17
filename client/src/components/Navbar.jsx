@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   HousePlus,
@@ -53,6 +53,7 @@ export default function Navbar() {
       console.error(error)
     }
   };
+
   return (
     <div className="z-20 bg-transparent">
       <header className="sticky top-0 flex h-16 items-center gap-2 md:gap-4 border-b bg-transparent bg-opacity-50 backdrop-blur-md px-4 md:px-6 justify-between" >

@@ -14,7 +14,8 @@ export const addTodo = async(req, res, next)=>{
             userId,
             todoId : `todo_${Date.now()}`,
             todo,
-            createdAt: new Date().toISOString().slice(0,10)        
+            createdAt: Date.now(),
+            completed : false    
         }
 
         const command = new PutCommand({
@@ -58,7 +59,7 @@ export const getTodos = async(req,res, next)=>{
 
 export const updateTodo = async (req, res, next) => {
     const { todoId } = req.params; // Assume the todoId is passed in the request URL
-    const { todo } = req.body;     // The updated to-do content
+    const { todo, completed } = req.body;     // The updated to-do content
     const userId = req.user.userId; // Extract the userId from the authenticated user
   
     if (userId !== req.params.userId) {
@@ -72,12 +73,14 @@ export const updateTodo = async (req, res, next) => {
           userId,   // Partition key (your primary key)
           todoId,   // Sort key (if applicable)
         },
-        UpdateExpression: 'set #todo = :todo', // Update the 'todo' field
+        UpdateExpression: 'set #todo = :todo, #completed = :completed', // Update the 'todo' field
         ExpressionAttributeNames: {
-          '#todo': 'todo',  // Alias for attribute names (since 'todo' might be a reserved keyword)
+            '#todo': 'todo',  // Alias for attribute names (since 'todo' might be a reserved keyword)
+            '#completed': 'completed',
         },
         ExpressionAttributeValues: {
-          ':todo': todo,    // The updated todo value
+            ':todo': todo,    // The updated todo value
+            ':completed': completed,
         },
         ReturnValues: 'ALL_NEW', // Return the updated item after the operation
       });

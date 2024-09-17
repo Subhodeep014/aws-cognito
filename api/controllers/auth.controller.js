@@ -99,9 +99,10 @@ export const signin = async (req, res, next) => {
     const accessToken = authResponse.AuthenticationResult.AccessToken;
     const refreshToken = authResponse.AuthenticationResult.RefreshToken;
     const idToken = authResponse.AuthenticationResult.IdToken;
-
+    // console.log(idToken)
     // Step 4: Decode ID token to get user info (name, email, etc.)
     const decodedIdToken = jwt.decode(idToken);
+
 
     // Step 5: Set tokens in cookies and return user info
     return res.status(200)
@@ -119,7 +120,7 @@ export const signin = async (req, res, next) => {
         message: 'Sign-in successful',
         name: decodedIdToken.name,
         email: decodedIdToken.email,
-        userId: decodedIdToken?.username,
+        userId: decodedIdToken["cognito:username"],
       });
 
   } catch (error) {
