@@ -10,11 +10,10 @@ const app = express();
 dotenv.config();
 app.use(express.json());
 app.use(cookieParser())
-const allowedOrigin = 'https://stacktaskaws.netlify.app';
+// const allowedOrigin = 'https://stacktaskaws.netlify.app';
 app.use(cors({
-    origin: allowedOrigin,
+    origin: 'https://stacktaskaws.netlify.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true, // If you need to allow cookies or authorization headers
   }));
 app.use('/api/user', authRouter)
 app.use('/api/todo', todoRouter)
