@@ -7,7 +7,6 @@ const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGIO
 
 export const signup = async (req, res, next) => {
     const { email, password, name } = req.body;
-    console.log(email, password, name)
   
     try {
         // Check if the email already exists in the user pool
