@@ -5,6 +5,7 @@ import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken'
 const client = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION });
 
+
 export const signup = async (req, res, next) => {
     const { email, password, name } = req.body;
   
