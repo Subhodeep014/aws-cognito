@@ -12,7 +12,10 @@ const _dirname = path.resolve()
 
 app.use(express.json());
 app.use(cookieParser())
-app.use(cors())
+app.use(cors({
+    origin: 'https://awscognito.onrender.com', // Only allow this domain
+    credentials: true, // Enable sending cookies and other credentials
+  }))
 app.use('/api/user', authRouter)
 app.use('/api/todo', todoRouter)
 
