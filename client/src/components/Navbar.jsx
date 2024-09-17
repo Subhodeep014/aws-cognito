@@ -131,7 +131,7 @@ export default function Navbar() {
                   <h1 className='flex gap-2'><NotebookPen  size={28} strokeWidth={2}/> StackTask.com</h1>
                 </Link>
                 <Link
-                  to='/sign-in'>
+                  to='/signin'>
                     <Button>Signin</Button>
                 </Link>
                 <Link
